@@ -1,0 +1,116 @@
+import { useState, useEffect } from 'react'
+import { useWebSocketStore } from '../store/websocketStore'
+
+interface TradeFeedWidgetProps {
+  tokenAddress: string
+  title: string
+}
+
+function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
+  const allTrades = useWebSocketStore((state) => state.trades)
+  const subscribeToTrades = useWebSocketStore((state) => state.subscribeToTrades)
+  const unsubscribeFromTrades = useWebSocketStore((state) => state.unsubscribeFromTrades)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const trades = allTrades.get(tokenAddress) || []
+
+  useEffect(() => {
+    subscribeToTrades(tokenAddress)
+
+    return () => {
+      unsubscribeFromTrades(tokenAddress)
+    }
+  }, [tokenAddress, subscribeToTrades, unsubscribeFromTrades])
+
+  useEffect(() => {
+    if (trades.length > 0) {
+      setLoading(false)
+      setError(null)
+    } else {
+      const timeout = setTimeout(() => {
+        if (trades.length === 0) {
+          setError('Failed to fetch trades')
+          setLoading(false)
+        }
+      }, 10000)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [trades])
+
+  if (loading && trades.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
+        <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
+        <div className="animate-pulse space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
+        <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
+        <div className="text-red-600">{error}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849] min-w-[320px] max-w-[450px]">
+      <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
+      <div className="space-y-3 max-h-[500px] overflow-y-auto">
+        {trades.length === 0 ? (
+          <div className="text-sm text-gray-600">No recent trades</div>
+        ) : (
+          trades.map((trade) => (
+            <div
+              key={trade.hash}
+              className={`p-3 rounded-lg border-l-4 ${
+                trade.type === 'buy' ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <span className={`font-bold text-sm ${
+                  trade.type === 'buy' ? 'text-green-700' : 'text-red-700'
+                }`}>
+                  {trade.type.toUpperCase()}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {new Date(trade.timestamp * 1000).toLocaleTimeString()}
+                </span>
+              </div>
+              <div className="text-sm font-semibold text-gray-800 mb-1">
+                {trade.amount.toLocaleString()} tokens
+              </div>
+              <div className="text-xs text-gray-600 truncate">
+                From: {trade.from.slice(0, 6)}...{trade.from.slice(-4)}
+              </div>
+              <div className="text-xs text-gray-600 truncate">
+                To: {trade.to.slice(0, 6)}...{trade.to.slice(-4)}
+              </div>
+              <a
+                href={`https://solscan.io/tx/${trade.hash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:text-blue-800 mt-1 inline-block"
+              >
+                View on Solscan
+              </a>
+            </div>
+          ))
+        )}
+      </div>
+      <div className="text-xs text-gray-500 mt-4 text-right">
+        Last updated: {new Date().toLocaleTimeString()}
+      </div>
+    </div>
+  )
+}
+
+export default TradeFeedWidget

@@ -1,19 +1,11 @@
 import { useState } from 'react'
+import LivePriceWidget from './LivePriceWidget'
+import TradeFeedWidget from './TradeFeedWidget'
+import { useWidgetStore } from '../store/widgetStore'
+import type { Widget } from '../store/widgetStore'
 
-interface Widget {
-  id: string
-  type: string
-  title: string
-  x: number
-  y: number
-}
-
-interface WidgetGridProps {
-  widgets: Widget[]
-  onUpdateWidgets: (widgets: Widget[]) => void
-}
-
-function WidgetGrid({ widgets, onUpdateWidgets }: WidgetGridProps) {
+function WidgetGrid() {
+  const { widgets, updateWidgetPosition } = useWidgetStore()
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
@@ -40,35 +32,16 @@ function WidgetGrid({ widgets, onUpdateWidgets }: WidgetGridProps) {
     const newX = e.clientX - gridRect.left - dragOffset.x
     const newY = e.clientY - gridRect.top - dragOffset.y
 
-    const updatedWidgets = widgets.map(widget =>
-      widget.id === draggedWidget
-        ? { ...widget, x: Math.max(0, newX), y: Math.max(0, newY) }
-        : widget
-    )
-
-    onUpdateWidgets(updatedWidgets)
+    updateWidgetPosition(draggedWidget, newX, newY)
     setDraggedWidget(null)
   }
 
   const renderWidget = (widget: Widget) => {
     switch (widget.type) {
       case 'live-price':
-        return (
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
-            <h3 className="text-xl font-bold text-[#081849] mb-4">{widget.title}</h3>
-            <div className="text-4xl font-bold text-green-600">$0.00</div>
-            <div className="text-sm text-gray-500 mt-2">Last updated: Now</div>
-          </div>
-        )
+        return <LivePriceWidget tokenAddress={widget.tokenAddress} title={widget.title} />
       case 'trade-feed':
-        return (
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
-            <h3 className="text-xl font-bold text-[#081849] mb-4">{widget.title}</h3>
-            <div className="space-y-2">
-              <div className="text-sm text-gray-600">No trades yet</div>
-            </div>
-          </div>
-        )
+        return <TradeFeedWidget tokenAddress={widget.tokenAddress} title={widget.title} />
       default:
         return (
           <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
