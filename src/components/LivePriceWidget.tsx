@@ -77,7 +77,7 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
 
       <div className="p-6">
         <div className="mb-4 pb-3 border-b border-gray-200">
-          <div className="text-xs text-gray-500 mb-1">Contract Address</div>
+          <div className="text-xs text-gray-500 mb-1">Contract</div>
           <div className="text-sm font-mono text-gray-700 break-all">{displayAddress}</div>
         </div>
 
@@ -85,8 +85,8 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
           <div className="mb-3">
             <div className="text-5xl font-bold text-[#081849]">
               ${priceData.price.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 8
               })}
             </div>
           </div>

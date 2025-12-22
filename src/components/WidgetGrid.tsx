@@ -2,10 +2,12 @@ import { useState } from 'react'
 import LivePriceWidget from './LivePriceWidget'
 import TradeFeedWidget from './TradeFeedWidget'
 import { useWidgetStore } from '../store/widgetStore'
+import { useWebSocketStore } from '../store/websocketStore'
 import type { Widget } from '../store/widgetStore'
 
 function WidgetGrid() {
-  const { widgets, updateWidgetPosition } = useWidgetStore()
+  const { widgets, updateWidgetPosition, removeWidget } = useWidgetStore()
+  const { unsubscribeFromPriceUpdates } = useWebSocketStore()
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
@@ -34,6 +36,11 @@ function WidgetGrid() {
 
     updateWidgetPosition(draggedWidget, newX, newY)
     setDraggedWidget(null)
+  }
+
+  const handleRemoveWidget = (widgetId: string, tokenAddress: string) => {
+    unsubscribeFromPriceUpdates(tokenAddress)
+    removeWidget(widgetId)
   }
 
   const renderWidget = (widget: Widget) => {
@@ -69,8 +76,15 @@ function WidgetGrid() {
               top: `${widget.y}px`,
               cursor: draggedWidget === widget.id ? 'grabbing' : 'grab'
             }}
-            className="transition-opacity duration-200 hover:opacity-90"
+            className="transition-opacity duration-200 hover:opacity-90 relative group"
           >
+            <button
+              onClick={() => handleRemoveWidget(widget.id, widget.tokenAddress)}
+              className="absolute -top-2 -right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition-opacity duration-200"
+              title="Remove widget"
+            >
+              ×
+            </button>
             {renderWidget(widget)}
           </div>
         ))}
@@ -96,7 +110,14 @@ function WidgetGrid() {
         ) : (
           <div className="space-y-4">
             {widgets.map(widget => (
-              <div key={widget.id} className="w-full">
+              <div key={widget.id} className="w-full relative group">
+                <button
+                  onClick={() => handleRemoveWidget(widget.id, widget.tokenAddress)}
+                  className="absolute -top-2 -right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+                  title="Remove widget"
+                >
+                  ×
+                </button>
                 {renderWidget(widget)}
               </div>
             ))}
