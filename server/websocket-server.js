@@ -44,18 +44,19 @@ async function getTokenPrice(tokenAddress) {
 
     const data = await response.json()
     const tokenPriceUSD = data.data.price || 0
-    let priceSol = data.data.price_sol || data.data.priceSol
 
-    if (!priceSol && tokenPriceUSD > 0) {
-      const solPriceUSD = await getSolPrice()
-      if (solPriceUSD > 0) {
-        priceSol = tokenPriceUSD / solPriceUSD
-      }
+    let priceSol = 0
+    const solPriceUSD = await getSolPrice()
+    if (solPriceUSD > 0) {
+      priceSol = tokenPriceUSD / solPriceUSD
     }
+
+    const priceChange24h = data.data.price_change_24h || 0
+    const priceChange24hRounded = Math.round(priceChange24h * 100) / 100
 
     return {
       price: tokenPriceUSD,
-      priceChange5m: data.data.price_change_5m || 0,
+      priceChange24h: priceChange24hRounded,
       symbol: data.data.symbol || '',
       name: data.data.name || '',
       priceSol: priceSol,
@@ -147,9 +148,9 @@ async function fetchAndBroadcastTrades() {
   }
 }
 
-setInterval(fetchAndBroadcastPrices, 3000)
+setInterval(fetchAndBroadcastPrices, 1000)
 
-setInterval(fetchAndBroadcastTrades, 5000)
+setInterval(fetchAndBroadcastTrades, 1000)
 
 wss.on('connection', (ws) => {
   console.log('Client connected')

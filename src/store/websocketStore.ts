@@ -13,7 +13,7 @@ interface WebSocketStore {
 
 interface TokenPrice {
   price: number
-  priceChange5m: number
+  priceChange24h: number
   symbol: string
   name: string
   priceSol?: number
