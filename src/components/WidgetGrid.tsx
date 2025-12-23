@@ -61,7 +61,7 @@ function WidgetGrid() {
   return (
     <>
       <div
-        className="hidden md:block relative w-full h-[calc(100vh-4rem)] bg-[#ecdfd2]"
+        className="hidden md:block relative w-full min-h-[calc(100vh-4rem)]"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
@@ -99,7 +99,7 @@ function WidgetGrid() {
         )}
       </div>
 
-      <div className="md:hidden w-full min-h-[calc(100vh-4rem)] bg-[#ecdfd2] p-4">
+      <div className="md:hidden w-full min-h-[calc(100vh-4rem)] p-4">
         {widgets.length === 0 ? (
           <div className="flex items-center justify-center min-h-[50vh]">
             <div className="text-center">

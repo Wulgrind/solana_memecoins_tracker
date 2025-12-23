@@ -27,7 +27,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ecdfd2]">
+    <div className="min-h-screen">
       <Navbar onAddWidget={openModal} />
       <WidgetGrid />
 
