@@ -21,7 +21,7 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
     return () => {
       unsubscribeFromPriceUpdates(tokenAddress)
     }
-  }, [tokenAddress, subscribeToPriceUpdates, unsubscribeFromPriceUpdates])
+  }, [tokenAddress])
 
   useEffect(() => {
     if (priceData) {
@@ -68,7 +68,7 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
     : tokenAddress
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[400px] overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
       <div className="bg-[#081849] text-center px-6 py-4">
         <h3 className="text-xl font-bold text-white">
           {priceData.name} ({priceData.symbol})
@@ -82,8 +82,8 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
         </div>
 
         <div className="mb-4 pb-4 border-b border-gray-200">
-          <div className="mb-3">
-            <div className="text-5xl font-bold text-[#081849]">
+          <div className="mb-3 overflow-x-auto">
+            <div className="text-5xl font-bold text-[#081849] whitespace-nowrap">
               ${priceData.price.toLocaleString(undefined, {
                 minimumFractionDigits: 4,
                 maximumFractionDigits: 8
@@ -92,11 +92,13 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
           </div>
 
         <div className="mt-3">
-          <div className="text-3xl font-semibold text-purple-600">
-            ◎ {priceData.priceSol ? priceData.priceSol.toLocaleString(undefined, {
-              minimumFractionDigits: 4,
-              maximumFractionDigits: 8
-            }) : 'N/A'}
+          <div className="overflow-x-auto">
+            <div className="text-3xl font-semibold text-purple-600 whitespace-nowrap">
+              ◎ {priceData.priceSol ? priceData.priceSol.toLocaleString(undefined, {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 8
+              }) : 'N/A'}
+            </div>
           </div>
           <div className="text-xs text-gray-500 mt-1">Price in SOL</div>
         </div>

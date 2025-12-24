@@ -34,22 +34,34 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
   contractAddress: '',
 
   addWidget: (type, title, tokenAddress) =>
-    set((state) => ({
-      widgets: [
-        ...state.widgets,
-        {
-          id: `widget-${Date.now()}`,
-          type,
-          title,
-          tokenAddress,
-          x: 50,
-          y: 50,
-        },
-      ],
-      isModalOpen: false,
-      selectedWidgetType: null,
-      contractAddress: '',
-    })),
+    set((state) => {
+      const horizontalOffset = 480
+      const verticalOffset = 500
+      const maxPerRow = 3
+      const widgetCount = state.widgets.length
+      const row = Math.floor(widgetCount / maxPerRow)
+      const col = widgetCount % maxPerRow
+
+      const x = 50 + (col * horizontalOffset)
+      const y = 50 + (row * verticalOffset)
+
+      return {
+        widgets: [
+          ...state.widgets,
+          {
+            id: `widget-${Date.now()}`,
+            type,
+            title,
+            tokenAddress,
+            x,
+            y,
+          },
+        ],
+        isModalOpen: false,
+        selectedWidgetType: null,
+        contractAddress: '',
+      }
+    }),
 
   updateWidget: (id, updates) =>
     set((state) => ({

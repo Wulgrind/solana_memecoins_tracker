@@ -90,7 +90,7 @@ function WidgetGrid() {
         ))}
 
         {widgets.length === 0 && (
-          <div className="flex items-center justify-center h-full">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-700 mb-2">No widgets yet</h2>
               <p className="text-gray-500">Click "+ Add Widget" to get started</p>
@@ -110,10 +110,10 @@ function WidgetGrid() {
         ) : (
           <div className="space-y-4">
             {widgets.map(widget => (
-              <div key={widget.id} className="w-full relative group">
+              <div key={widget.id} className="w-full relative group overflow-visible">
                 <button
                   onClick={() => handleRemoveWidget(widget.id, widget.tokenAddress)}
-                  className="absolute -top-2 -right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+                  className="absolute top-2 right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-lg font-bold"
                   title="Remove widget"
                 >
                   ×

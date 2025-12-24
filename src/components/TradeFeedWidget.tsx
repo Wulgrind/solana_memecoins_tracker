@@ -8,12 +8,14 @@ interface TradeFeedWidgetProps {
 
 function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
   const allTrades = useWebSocketStore((state) => state.trades)
+  const prices = useWebSocketStore((state) => state.prices)
   const subscribeToTrades = useWebSocketStore((state) => state.subscribeToTrades)
   const unsubscribeFromTrades = useWebSocketStore((state) => state.unsubscribeFromTrades)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const trades = allTrades.get(tokenAddress) || []
+  const priceData = prices.get(tokenAddress) || null
 
   useEffect(() => {
     subscribeToTrades(tokenAddress)
@@ -21,7 +23,8 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
     return () => {
       unsubscribeFromTrades(tokenAddress)
     }
-  }, [tokenAddress, subscribeToTrades, unsubscribeFromTrades])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tokenAddress])
 
   useEffect(() => {
     if (trades.length > 0) {
@@ -41,12 +44,19 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
 
   if (loading && trades.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
-        <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
-        <div className="animate-pulse space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-gray-200 rounded"></div>
-          ))}
+      <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
+        <div className="bg-[#081849] text-center px-6 py-4">
+          <h3 className="text-xl font-bold text-white">
+            {priceData ? `${priceData.name} (${priceData.symbol})` : 'Loading...'}
+          </h3>
+        </div>
+        <div className="p-6">
+          <h4 className="text-sm font-semibold text-gray-600 mb-4">Trade Feed</h4>
+          <div className="animate-pulse space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -54,17 +64,30 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
-        <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
-        <div className="text-red-600">{error}</div>
+      <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
+        <div className="bg-[#081849] text-center px-6 py-4">
+          <h3 className="text-xl font-bold text-white">
+            {priceData ? `${priceData.name} (${priceData.symbol})` : title}
+          </h3>
+        </div>
+        <div className="p-6">
+          <h4 className="text-sm font-semibold text-gray-600 mb-4">Trade Feed</h4>
+          <div className="text-red-600">{error}</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849] min-w-[320px] max-w-[450px]">
-      <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
-      <div className="space-y-3 max-h-[500px] overflow-y-auto">
+    <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
+      <div className="bg-[#081849] text-center px-6 py-4">
+        <h3 className="text-xl font-bold text-white">
+          {priceData ? `${priceData.name} (${priceData.symbol})` : title}
+        </h3>
+      </div>
+      <div className="p-6">
+        <h4 className="text-sm font-semibold text-gray-600 mb-4">Trade Feed</h4>
+        <div className="space-y-3 max-h-[500px] overflow-y-auto">
         {trades.length === 0 ? (
           <div className="text-sm text-gray-600">No recent trades</div>
         ) : (
@@ -95,7 +118,7 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
                 To: {trade.to.slice(0, 6)}...{trade.to.slice(-4)}
               </div>
               <a
-                href={`https://solscan.io/tx/${trade.hash}`}
+                href={`https://solscan.io/tx/${trade.originalHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-blue-600 hover:text-blue-800 mt-1 inline-block"
@@ -106,8 +129,9 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
           ))
         )}
       </div>
-      <div className="text-xs text-gray-500 mt-4 text-right">
-        Last updated: {new Date().toLocaleTimeString()}
+        <div className="text-xs text-gray-500 mt-4 text-right">
+          Last updated: {new Date().toLocaleTimeString()}
+        </div>
       </div>
     </div>
   )

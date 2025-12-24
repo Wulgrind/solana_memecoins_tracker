@@ -1,9 +1,10 @@
-import './App.css'
 import Navbar from './components/Navbar'
 import Modal from './components/Modal'
 import Card from './components/Card'
 import WidgetGrid from './components/WidgetGrid'
 import { useWidgetStore } from './store/widgetStore'
+import first_img from './assets/indicators.webp'
+import second_img from './assets/bullvsbear.webp'
 
 function App() {
   const {
@@ -37,21 +38,22 @@ function App() {
             <div className="flex-1 flex items-center justify-center p-6">
               <div onClick={() => handleWidgetTypeSelect('live-price', 'Live Price Widget')}>
                 <Card
-                  image="https://via.placeholder.com/400x300"
+                  image={first_img}
                   title="Live Price Widget"
                   description="Track real-time price updates with 5-minute change indicators and digital display"
                 />
               </div>
             </div>
 
-            <div className="w-0.5 h-3/4 bg-[#081849] rounded-full"></div>
+            <div className="hidden md:block w-0.5 h-3/4 bg-[#081849] rounded-full"></div>
 
             <div className="flex-1 flex items-center justify-center p-6">
               <div onClick={() => handleWidgetTypeSelect('trade-feed', 'Trade Feed Widget')}>
                 <Card
-                  image="https://via.placeholder.com/400x300"
+                  image={second_img}
                   title="Trade Feed Widget"
                   description="View the latest 20 transactions with wallet addresses, amounts and Solscan links"
+                  imageOffset="translate-y-10"
                 />
               </div>
             </div>
