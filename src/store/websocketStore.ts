@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { websocketService, type TokenPrice, type Trade } from '../services/websocketService'
+import { websocketService, TokenPrice, Trade } from '../services/websocketService'
 
 interface WebSocketStore {
   prices: Map<string, TokenPrice>

@@ -1,5 +1,5 @@
-const WS_URL = import.meta.env.VITE_WS_URL
 const API_KEY = import.meta.env.VITE_MOBULA_KEY
+const WS_URL = 'wss://api.mobula.io'
 const API_BASE = 'https://api.mobula.io/api/1'
 
 const TOKEN_ADDRESS_MAP: Record<string, string> = {
