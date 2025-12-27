@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { urlSyncService } from '../services/urlSyncService'
 
 export interface Widget {
   id: string
@@ -25,6 +26,7 @@ interface WidgetStore {
   selectWidgetType: (type: string, title: string) => void
   setContractAddress: (address: string) => void
   resetModalState: () => void
+  initializeFromURL: () => void
 }
 
 export const useWidgetStore = create<WidgetStore>((set) => ({
@@ -32,6 +34,13 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
   isModalOpen: false,
   selectedWidgetType: null,
   contractAddress: '',
+
+  initializeFromURL: () => {
+    const widgets = urlSyncService.getWidgetsFromURL()
+    if (widgets.length > 0) {
+      set({ widgets })
+    }
+  },
 
   addWidget: (type, title, tokenAddress) =>
     set((state) => {
@@ -45,18 +54,22 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
       const x = 50 + (col * horizontalOffset)
       const y = 50 + (row * verticalOffset)
 
+      const newWidgets = [
+        ...state.widgets,
+        {
+          id: `widget-${Date.now()}`,
+          type,
+          title,
+          tokenAddress,
+          x,
+          y,
+        },
+      ]
+
+      urlSyncService.updateURL(newWidgets)
+
       return {
-        widgets: [
-          ...state.widgets,
-          {
-            id: `widget-${Date.now()}`,
-            type,
-            title,
-            tokenAddress,
-            x,
-            y,
-          },
-        ],
+        widgets: newWidgets,
         isModalOpen: false,
         selectedWidgetType: null,
         contractAddress: '',
@@ -64,25 +77,34 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
     }),
 
   updateWidget: (id, updates) =>
-    set((state) => ({
-      widgets: state.widgets.map((widget) =>
+    set((state) => {
+      const newWidgets = state.widgets.map((widget) =>
         widget.id === id ? { ...widget, ...updates } : widget
-      ),
-    })),
+      )
+      urlSyncService.updateURL(newWidgets)
+      return { widgets: newWidgets }
+    }),
 
-  updateWidgets: (widgets) => set({ widgets }),
+  updateWidgets: (widgets) => {
+    urlSyncService.updateURL(widgets)
+    set({ widgets })
+  },
 
   updateWidgetPosition: (id, x, y) =>
-    set((state) => ({
-      widgets: state.widgets.map((widget) =>
+    set((state) => {
+      const newWidgets = state.widgets.map((widget) =>
         widget.id === id ? { ...widget, x: Math.max(0, x), y: Math.max(0, y) } : widget
-      ),
-    })),
+      )
+      urlSyncService.updateURL(newWidgets)
+      return { widgets: newWidgets }
+    }),
 
   removeWidget: (id) =>
-    set((state) => ({
-      widgets: state.widgets.filter((widget) => widget.id !== id),
-    })),
+    set((state) => {
+      const newWidgets = state.widgets.filter((widget) => widget.id !== id)
+      urlSyncService.updateURL(newWidgets)
+      return { widgets: newWidgets }
+    }),
 
   openModal: () => set({ isModalOpen: true }),
 

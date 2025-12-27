@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Modal from './components/Modal'
 import Card from './components/Card'
@@ -16,7 +17,12 @@ function App() {
     selectWidgetType,
     setContractAddress,
     addWidget,
+    initializeFromURL,
   } = useWidgetStore()
+
+  useEffect(() => {
+    initializeFromURL()
+  }, [initializeFromURL])
 
   const handleWidgetTypeSelect = (type: string, title: string) => {
     selectWidgetType(type, title)
