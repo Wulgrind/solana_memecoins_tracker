@@ -26,7 +26,13 @@ export const useWebSocketStore = create<WebSocketStore>((set) => {
       set((state) => {
         const newTrades = new Map(state.trades)
         const existingTrades = newTrades.get(tokenAddress) || []
-        newTrades.set(tokenAddress, [trade, ...existingTrades.slice(0, 19)])
+        
+        const tradeExists = existingTrades.some(t => t.originalHash === trade.originalHash)
+
+        if (!tradeExists) {
+          newTrades.set(tokenAddress, [trade, ...existingTrades.slice(0, 19)])
+        }
+
         return { trades: newTrades }
       })
     }
@@ -48,7 +54,13 @@ export const useWebSocketStore = create<WebSocketStore>((set) => {
       set((state) => {
         const newTrades = new Map(state.trades)
         const existingTrades = newTrades.get(tokenAddress) || []
-        newTrades.set(tokenAddress, [trade, ...existingTrades.slice(0, 19)])
+
+        const tradeExists = existingTrades.some(t => t.originalHash === trade.originalHash)
+
+        if (!tradeExists) {
+          newTrades.set(tokenAddress, [trade, ...existingTrades.slice(0, 19)])
+        }
+
         return { trades: newTrades }
       })
     },
