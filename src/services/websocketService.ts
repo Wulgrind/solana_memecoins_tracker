@@ -25,7 +25,6 @@ export interface Trade {
   hash: string
   originalHash: string
   from: string
-  to: string
   amount: number
   timestamp: number
   type: 'buy' | 'sell'
@@ -110,8 +109,7 @@ class WebSocketService {
 
   async fetchInitialTrades(tokenAddress: string): Promise<Trade[]> {
     try {
-      const normalizedAddress = normalizeSolanaAddress(tokenAddress)
-      const response = await fetch(`https://api.mobula.io/api/2/token/trades?blockchain=solana&address=${normalizedAddress}&limit=20&mode=asset`, {
+      const response = await fetch(`https://api.mobula.io/api/1/market/trades/pair?asset=${tokenAddress}&blockchain=solana&limit=20`, {
         headers: {
           'Authorization': API_KEY
         }
@@ -121,19 +119,20 @@ class WebSocketService {
         console.warn('Could not fetch initial trades for token:', tokenAddress)
         return []
       }
-
+    
       const data = await response.json()
 
       if (data.data && Array.isArray(data.data)) {
         return data.data.map((trade: any, index: number) => {
-          const originalHash = trade.transactionHash || trade.hash || `tx-${Date.now()}-${Math.random()}`
+          const originalHash = trade.has
+          const timestamp = trade.date / 1000
+
           return {
             hash: `${originalHash}-${index}`,
             originalHash: originalHash,
-            from: trade.swapSenderAddress || trade.from || 'Unknown',
-            to: trade.to || trade.receiver || 'Unknown',
-            amount: parseFloat(trade.baseTokenAmount || trade.amount || 0),
-            timestamp: trade.date ? new Date(trade.date).getTime() / 1000 : Date.now() / 1000,
+            from: trade.sender,
+            amount: parseFloat(trade.token_amount),
+            timestamp: timestamp,
             type: trade.type === 'sell' ? 'sell' : 'buy'
           }
         })
@@ -270,8 +269,7 @@ class WebSocketService {
             const newTrade: Trade = {
               hash: `${message.hash}-${Date.now()}`,
               originalHash: message.hash,
-              from: message.sender || 'Unknown',
-              to: message.swapRecipient || 'Unknown',
+              from: message.sender,
               amount: parseFloat(message.token_amount || 0),
               timestamp: message.date ? message.date / 1000 : Date.now() / 1000,
               type: message.type === 'sell' ? 'sell' : 'buy'

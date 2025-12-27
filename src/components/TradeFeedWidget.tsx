@@ -3,10 +3,9 @@ import { useWebSocketStore } from '../store/websocketStore'
 
 interface TradeFeedWidgetProps {
   tokenAddress: string
-  title: string
 }
 
-function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
+function TradeFeedWidget({ tokenAddress }: TradeFeedWidgetProps) {
   const allTrades = useWebSocketStore((state) => state.trades)
   const prices = useWebSocketStore((state) => state.prices)
   const subscribeToTrades = useWebSocketStore((state) => state.subscribeToTrades)
@@ -17,13 +16,24 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
   const trades = allTrades.get(tokenAddress) || []
   const priceData = prices.get(tokenAddress) || null
 
+  const shortenAddress = (address: string) => {
+    if (address.length <= 12) return address
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
+
+  const getDisplayTitle = () => {
+    if (priceData?.name && priceData?.symbol) {
+      return `${priceData.name} (${priceData.symbol})`
+    }
+    return shortenAddress(tokenAddress)
+  }
+
   useEffect(() => {
     subscribeToTrades(tokenAddress)
 
     return () => {
       unsubscribeFromTrades(tokenAddress)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenAddress])
 
   useEffect(() => {
@@ -47,7 +57,7 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
       <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
         <div className="bg-[#081849] text-center px-6 py-4">
           <h3 className="text-xl font-bold text-white">
-            {priceData ? `${priceData.name} (${priceData.symbol})` : 'Loading...'}
+            {getDisplayTitle()}
           </h3>
         </div>
         <div className="p-6">
@@ -67,7 +77,7 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
       <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
         <div className="bg-[#081849] text-center px-6 py-4">
           <h3 className="text-xl font-bold text-white">
-            {priceData ? `${priceData.name} (${priceData.symbol})` : title}
+            {getDisplayTitle()}
           </h3>
         </div>
         <div className="p-6">
@@ -82,7 +92,7 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
     <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
       <div className="bg-[#081849] text-center px-6 py-4">
         <h3 className="text-xl font-bold text-white">
-          {priceData ? `${priceData.name} (${priceData.symbol})` : title}
+          {getDisplayTitle()}
         </h3>
       </div>
       <div className="p-6">
@@ -113,9 +123,6 @@ function TradeFeedWidget({ tokenAddress, title }: TradeFeedWidgetProps) {
               </div>
               <div className="text-xs text-gray-600 truncate">
                 From: {trade.from.slice(0, 6)}...{trade.from.slice(-4)}
-              </div>
-              <div className="text-xs text-gray-600 truncate">
-                To: {trade.to.slice(0, 6)}...{trade.to.slice(-4)}
               </div>
               <a
                 href={`https://solscan.io/tx/${trade.originalHash}`}
