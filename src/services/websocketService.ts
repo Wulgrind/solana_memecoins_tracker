@@ -238,7 +238,6 @@ class WebSocketService {
     this.ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data)
-        console.log('WebSocket message received:', message)
 
         if (message && message.pairData) {
           const pairData = message.pairData
