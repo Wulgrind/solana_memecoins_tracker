@@ -2,14 +2,14 @@ const API_KEY = import.meta.env.VITE_MOBULA_KEY
 const WS_URL = 'wss://api.mobula.io'
 const API_BASE = 'https://api.mobula.io/api/1'
 
-const TOKEN_ADDRESS_MAP: Record<string, string> = {
+const SOLANA_ADDRESS_MAP: Record<string, string> = {
   'solana': 'So11111111111111111111111111111111111111112',
   'sol': 'So11111111111111111111111111111111111111112',
 }
 
-function normalizeTokenAddress(input: string): string {
+function normalizeSolanaAddress(input: string): string {
   const normalized = input.toLowerCase().trim()
-  return TOKEN_ADDRESS_MAP[normalized] || input
+  return SOLANA_ADDRESS_MAP[normalized] || input
 }
 
 export interface TokenPrice {
@@ -110,7 +110,7 @@ class WebSocketService {
 
   async fetchInitialTrades(tokenAddress: string): Promise<Trade[]> {
     try {
-      const normalizedAddress = normalizeTokenAddress(tokenAddress)
+      const normalizedAddress = normalizeSolanaAddress(tokenAddress)
       const response = await fetch(`https://api.mobula.io/api/2/token/trades?blockchain=solana&address=${normalizedAddress}&limit=20&mode=asset`, {
         headers: {
           'Authorization': API_KEY
@@ -148,7 +148,9 @@ class WebSocketService {
 
   private async getPoolsForToken(tokenAddress: string): Promise<{ blockchain: string; address: string }[]> {
     try {
-      const response = await fetch(`${API_BASE}/market/pairs?asset=${tokenAddress}&blockchain=Solana`, {
+      const normalizedAddress = normalizeSolanaAddress(tokenAddress)
+
+      const response = await fetch(`${API_BASE}/market/pairs?asset=${normalizedAddress}&blockchain=Solana`, {
         headers: {
           'Authorization': API_KEY
         }
@@ -165,6 +167,19 @@ class WebSocketService {
       const data = await response.json()
 
       if (data.data && data.data.pairs && Array.isArray(data.data.pairs) && data.data.pairs.length > 0) {
+        if (normalizedAddress === 'So11111111111111111111111111111111111111112') {
+          const sortedPools = [...data.data.pairs].sort((a: any, b: any) => {
+            const liquidityA = parseFloat(a.liquidity || 0)
+            const liquidityB = parseFloat(b.liquidity || 0)
+            return liquidityB - liquidityA
+          })
+
+          return sortedPools.slice(0, 1).map((pair: any) => ({
+            blockchain: pair.blockchain || 'Solana',
+            address: pair.address
+          }))
+        }
+        
         return data.data.pairs.slice(0, 3).map((pair: any) => ({
           blockchain: pair.blockchain || 'Solana',
           address: pair.address
@@ -223,6 +238,7 @@ class WebSocketService {
     this.ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data)
+        console.log('WebSocket message received:', message)
 
         if (message && message.pairData) {
           const pairData = message.pairData
@@ -242,8 +258,8 @@ class WebSocketService {
             const priceData: TokenPrice = {
               price: parseFloat(pairData.base.priceUSD) || 0,
               priceChange24h: parseFloat(pairData.priceChange24hPercentage || 0),
-              symbol: pairData.base.symbol,
-              name: pairData.base.name,
+              symbol: isSolana ? 'SOL' : pairData.base.symbol,
+              name: isSolana ? 'Solana' : pairData.base.name,
               priceSol: isSolana ? 1 : parseFloat(pairData.base.priceToken),
               tokenAddress: tokenAddress
             }

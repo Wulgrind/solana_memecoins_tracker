@@ -63,9 +63,6 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
   const priceChangeColor = priceData.priceChange24h >= 0 ? 'text-green-600' : 'text-red-600'
   const priceChangeSymbol = priceData.priceChange24h >= 0 ? '+' : ''
 
-  const displayAddress = tokenAddress.length > 20
-    ? `${tokenAddress.slice(0, 8)}...${tokenAddress.slice(-8)}`
-    : tokenAddress
 
   return (
     <div className="bg-white rounded-xl shadow-lg border-2 border-[#081849] min-w-[320px] max-w-[450px] overflow-hidden">
@@ -78,7 +75,7 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
       <div className="p-6">
         <div className="mb-4 pb-3 border-b border-gray-200">
           <div className="text-xs text-gray-500 mb-1">Contract</div>
-          <div className="text-sm font-mono text-gray-700 break-all">{displayAddress}</div>
+          <div className="text-sm font-mono text-gray-700 break-all">{tokenAddress}</div>
         </div>
 
         <div className="mb-4 pb-4 border-b border-gray-200">
