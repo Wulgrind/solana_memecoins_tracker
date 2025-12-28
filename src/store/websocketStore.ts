@@ -6,8 +6,6 @@ import type { TokenPrice, Trade } from '../services/websocketService'
 interface WebSocketStore {
   prices: Map<string, TokenPrice>
   trades: Map<string, Trade[]>
-  setPriceData: (tokenAddress: string, price: TokenPrice) => void
-  setTradeData: (tokenAddress: string, trade: Trade) => void
   subscribe: (tokenAddress: string) => Promise<void>
   unsubscribe: (tokenAddress: string) => void
 }
@@ -40,29 +38,6 @@ export const useWebSocketStore = create<WebSocketStore>((set) => {
   return {
     prices: new Map(),
     trades: new Map(),
-
-    setPriceData: (tokenAddress: string, price: TokenPrice) => {
-      set((state) => {
-        const newPrices = new Map(state.prices)
-        newPrices.set(tokenAddress, price)
-        return { prices: newPrices }
-      })
-    },
-
-    setTradeData: (tokenAddress: string, trade: Trade) => {
-      set((state) => {
-        const newTrades = new Map(state.trades)
-        const existingTrades = newTrades.get(tokenAddress) || []
-
-        const tradeExists = existingTrades.some(t => t.originalHash === trade.originalHash)
-
-        if (!tradeExists) {
-          newTrades.set(tokenAddress, [trade, ...existingTrades.slice(0, 19)])
-        }
-
-        return { trades: newTrades }
-      })
-    },
 
     subscribe: async (tokenAddress: string) => {
       const [initialData, initialTrades] = await Promise.all([
