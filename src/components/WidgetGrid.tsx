@@ -7,7 +7,7 @@ import type { Widget } from '../store/widgetStore'
 
 function WidgetGrid() {
   const { widgets, updateWidgetPosition, removeWidget } = useWidgetStore()
-  const { unsubscribeFromPriceUpdates } = useWebSocketStore()
+  const { unsubscribe } = useWebSocketStore()
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
@@ -39,7 +39,7 @@ function WidgetGrid() {
   }
 
   const handleRemoveWidget = (widgetId: string, tokenAddress: string) => {
-    unsubscribeFromPriceUpdates(tokenAddress)
+    unsubscribe(tokenAddress)
     removeWidget(widgetId)
   }
 

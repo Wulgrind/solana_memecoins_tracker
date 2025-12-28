@@ -6,9 +6,10 @@ interface LivePriceWidgetProps {
 }
 
 function LivePriceWidget({ tokenAddress }: LivePriceWidgetProps) {
-  const priceData = useWebSocketStore((state) => state.prices.get(tokenAddress) || null)
-  const subscribeToPriceUpdates = useWebSocketStore((state) => state.subscribeToPriceUpdates)
-  const unsubscribeFromPriceUpdates = useWebSocketStore((state) => state.unsubscribeFromPriceUpdates)
+  const prices = useWebSocketStore((state) => state.prices)
+  const priceData = prices.get(tokenAddress) || null
+  const subscribe = useWebSocketStore((state) => state.subscribe)
+  const unsubscribe = useWebSocketStore((state) => state.unsubscribe)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,12 +25,11 @@ function LivePriceWidget({ tokenAddress }: LivePriceWidgetProps) {
     return shortenAddress(tokenAddress)
   }
 
-
   useEffect(() => {
-    subscribeToPriceUpdates(tokenAddress)
+    subscribe(tokenAddress)
 
     return () => {
-      unsubscribeFromPriceUpdates(tokenAddress)
+      unsubscribe(tokenAddress)
     }
   }, [tokenAddress])
 

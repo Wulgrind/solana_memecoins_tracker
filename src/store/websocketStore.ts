@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { websocketService } from '../services/websocketService'
+import { useWidgetStore } from './widgetStore'
 import type { TokenPrice, Trade } from '../services/websocketService'
 
 interface WebSocketStore {
@@ -7,10 +8,8 @@ interface WebSocketStore {
   trades: Map<string, Trade[]>
   setPriceData: (tokenAddress: string, price: TokenPrice) => void
   setTradeData: (tokenAddress: string, trade: Trade) => void
-  subscribeToPriceUpdates: (tokenAddress: string) => Promise<void>
-  unsubscribeFromPriceUpdates: (tokenAddress: string) => void
-  subscribeToTrades: (tokenAddress: string) => Promise<void>
-  unsubscribeFromTrades: (tokenAddress: string) => void
+  subscribe: (tokenAddress: string) => Promise<void>
+  unsubscribe: (tokenAddress: string) => void
 }
 
 export const useWebSocketStore = create<WebSocketStore>((set) => {
@@ -65,36 +64,37 @@ export const useWebSocketStore = create<WebSocketStore>((set) => {
       })
     },
 
-    subscribeToPriceUpdates: async (tokenAddress: string) => {
-      const initialData = await websocketService.fetchInitialTokenData(tokenAddress)
-      if (initialData) {
-        set((state) => {
-          const newPrices = new Map(state.prices)
+    subscribe: async (tokenAddress: string) => {
+      const [initialData, initialTrades] = await Promise.all([
+        websocketService.fetchInitialTokenData(tokenAddress),
+        websocketService.fetchInitialTrades(tokenAddress)
+      ])
+
+      set((state) => {
+        const newPrices = new Map(state.prices)
+        const newTrades = new Map(state.trades)
+
+        if (initialData) {
           newPrices.set(tokenAddress, initialData)
-          return { prices: newPrices }
-        })
-      }
-      await websocketService.subscribe(tokenAddress)
-    },
+        }
 
-    unsubscribeFromPriceUpdates: (tokenAddress: string) => {
-      websocketService.unsubscribe(tokenAddress)
-    },
-
-    subscribeToTrades: async (tokenAddress: string) => {
-      const initialTrades = await websocketService.fetchInitialTrades(tokenAddress)
-      if (initialTrades.length > 0) {
-        set((state) => {
-          const newTrades = new Map(state.trades)
+        if (initialTrades.length > 0) {
           newTrades.set(tokenAddress, initialTrades)
-          return { trades: newTrades }
-        })
-      }
+        }
+
+        return { prices: newPrices, trades: newTrades }
+      })
+
       await websocketService.subscribe(tokenAddress)
     },
 
-    unsubscribeFromTrades: (tokenAddress: string) => {
-      websocketService.unsubscribe(tokenAddress)
+    unsubscribe: (tokenAddress: string) => {
+      const widgets = useWidgetStore.getState().widgets
+      const widgetsWithSameToken = widgets.filter(w => w.tokenAddress === tokenAddress)
+
+      if (widgetsWithSameToken.length === 0) {
+        websocketService.unsubscribe(tokenAddress)
+      }
     }
   }
 })
