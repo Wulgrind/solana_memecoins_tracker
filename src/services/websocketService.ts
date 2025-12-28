@@ -28,6 +28,8 @@ export interface Trade {
   amount: number
   timestamp: number
   type: 'buy' | 'sell'
+  tokenName?: string
+  tokenSymbol?: string
 }
 
 interface WebSocketCallbacks {
@@ -250,14 +252,16 @@ class WebSocketService {
             }
           }
 
-          if (pairData.base) {
-            const isSolana = pairData.base.symbol?.toUpperCase() === 'SOL' || pairData.base.name?.toLowerCase() === 'solana'
+          const isSolana = pairData.base?.symbol?.toUpperCase() === 'SOL' || pairData.base?.name?.toLowerCase() === 'solana'
+          const tokenName = isSolana ? 'Solana' : pairData.base?.name
+          const tokenSymbol = isSolana ? 'SOL' : pairData.base?.symbol
 
+          if (pairData.base) {
             const priceData: TokenPrice = {
               price: parseFloat(pairData.base.priceUSD) || 0,
               priceChange24h: parseFloat(pairData.priceChange24hPercentage || 0),
-              symbol: isSolana ? 'SOL' : pairData.base.symbol,
-              name: isSolana ? 'Solana' : pairData.base.name,
+              symbol: tokenSymbol,
+              name: tokenName,
               priceSol: isSolana ? 1 : parseFloat(pairData.base.priceToken),
               tokenAddress: tokenAddress
             }
@@ -272,7 +276,9 @@ class WebSocketService {
               from: message.sender,
               amount: parseFloat(message.token_amount || 0),
               timestamp: message.date ? message.date / 1000 : Date.now() / 1000,
-              type: message.type === 'sell' ? 'sell' : 'buy'
+              type: message.type === 'sell' ? 'sell' : 'buy',
+              tokenName: tokenName,
+              tokenSymbol: tokenSymbol
             }
 
             this.callbacks?.onTradeUpdate(tokenAddress, newTrade)

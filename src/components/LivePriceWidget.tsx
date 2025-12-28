@@ -3,17 +3,27 @@ import { useWebSocketStore } from '../store/websocketStore'
 
 interface LivePriceWidgetProps {
   tokenAddress: string
-  title: string
 }
 
-function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
-  const prices = useWebSocketStore((state) => state.prices)
+function LivePriceWidget({ tokenAddress }: LivePriceWidgetProps) {
+  const priceData = useWebSocketStore((state) => state.prices.get(tokenAddress) || null)
   const subscribeToPriceUpdates = useWebSocketStore((state) => state.subscribeToPriceUpdates)
   const unsubscribeFromPriceUpdates = useWebSocketStore((state) => state.unsubscribeFromPriceUpdates)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const priceData = prices.get(tokenAddress) || null
+  const shortenAddress = (address: string) => {
+    if (address.length <= 12) return address
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
+
+  const getDisplayTitle = () => {
+    if (priceData?.name && priceData?.symbol) {
+      return `${priceData.name} (${priceData.symbol})`
+    }
+    return shortenAddress(tokenAddress)
+  }
+
 
   useEffect(() => {
     subscribeToPriceUpdates(tokenAddress)
@@ -42,7 +52,7 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
   if (loading && !priceData) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
-        <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
+        <h3 className="text-xl font-bold text-[#081849] mb-4">{getDisplayTitle()}</h3>
         <div className="animate-pulse">
           <div className="h-10 bg-gray-200 rounded w-3/4 mb-2"></div>
           <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -54,7 +64,7 @@ function LivePriceWidget({ tokenAddress, title }: LivePriceWidgetProps) {
   if (error || !priceData) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">
-        <h3 className="text-xl font-bold text-[#081849] mb-4">{title}</h3>
+        <h3 className="text-xl font-bold text-[#081849] mb-4">{getDisplayTitle()}</h3>
         <div className="text-red-600">{error || 'No data available'}</div>
       </div>
     )

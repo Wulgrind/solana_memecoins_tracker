@@ -26,7 +26,7 @@ export const useWebSocketStore = create<WebSocketStore>((set) => {
       set((state) => {
         const newTrades = new Map(state.trades)
         const existingTrades = newTrades.get(tokenAddress) || []
-        
+
         const tradeExists = existingTrades.some(t => t.originalHash === trade.originalHash)
 
         if (!tradeExists) {

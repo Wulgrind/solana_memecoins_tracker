@@ -46,9 +46,9 @@ function WidgetGrid() {
   const renderWidget = (widget: Widget) => {
     switch (widget.type) {
       case 'live-price':
-        return <LivePriceWidget tokenAddress={widget.tokenAddress} title={widget.title} />
+        return <LivePriceWidget tokenAddress={widget.tokenAddress} />
       case 'trade-feed':
-        return <TradeFeedWidget tokenAddress={widget.tokenAddress} title={widget.title} />
+        return <TradeFeedWidget tokenAddress={widget.tokenAddress} />
       default:
         return (
           <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-[#081849]">

@@ -7,14 +7,12 @@ interface TradeFeedWidgetProps {
 
 function TradeFeedWidget({ tokenAddress }: TradeFeedWidgetProps) {
   const allTrades = useWebSocketStore((state) => state.trades)
-  const prices = useWebSocketStore((state) => state.prices)
   const subscribeToTrades = useWebSocketStore((state) => state.subscribeToTrades)
   const unsubscribeFromTrades = useWebSocketStore((state) => state.unsubscribeFromTrades)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const trades = allTrades.get(tokenAddress) || []
-  const priceData = prices.get(tokenAddress) || null
 
   const shortenAddress = (address: string) => {
     if (address.length <= 12) return address
@@ -22,8 +20,9 @@ function TradeFeedWidget({ tokenAddress }: TradeFeedWidgetProps) {
   }
 
   const getDisplayTitle = () => {
-    if (priceData?.name && priceData?.symbol) {
-      return `${priceData.name} (${priceData.symbol})`
+    const latestTrade = trades[0]
+    if (latestTrade?.tokenName && latestTrade?.tokenSymbol) {
+      return `${latestTrade.tokenName} (${latestTrade.tokenSymbol})`
     }
     return shortenAddress(tokenAddress)
   }
