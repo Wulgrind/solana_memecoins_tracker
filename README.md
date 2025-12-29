@@ -4,6 +4,10 @@ A real-time dashboard for tracking Solana memecoins with live price updates and 
 
 ![Dashboard Preview](https://img.shields.io/badge/React-18-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Vite](https://img.shields.io/badge/Vite-5-purple)
 
+<p align="center">
+  <img src="https://i.imgur.com/VydFBsp.png" alt="Screenshot" />
+</p>
+
 ## Features
 
 - **Real-time Price Tracking**: Live USD and SOL price updates via WebSocket
