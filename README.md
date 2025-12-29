@@ -34,8 +34,8 @@ A real-time dashboard for tracking Solana memecoins with live price updates and 
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd dashboard-memecoins
+git clone https://github.com/Wulgrind/solana_memecoins_tracker.git
+cd solana_memecoins_tracker
 ```
 
 2. Install dependencies:
