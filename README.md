@@ -117,7 +117,7 @@ This loads:
 - Last 20 transactions
 - Buy/Sell indicators (green/red)
 - Token amounts
-- Wallet addresses (from/to)
+- Wallet address
 - Solscan links for each transaction
 
 
